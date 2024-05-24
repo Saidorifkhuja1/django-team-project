@@ -1,0 +1,163 @@
+{% extends 'base.jinja2' %}
+{#{% macro jinja2_macros %}#}
+
+
+{% block title %}
+    Каталог
+{% endblock %}
+
+{% block body %}
+    <div class="Middle Middle_top">
+        <div class="Section Section_column Section_columnLeft">
+            <div class="wrap">
+                <div class="Section-column">
+                    <div class="Section-columnSection">
+                        <header class="Section-header">
+                            <strong class="Section-title">Фильтр
+                            </strong>
+                        </header>
+                        <div class="Section-columnContent">
+                            <form class="form" action="#" method="post">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <div class="range Section-columnRange">
+                                        <input class="range-line" id="price" name="price" type="text" data-type="double"
+                                               data-min="7" data-max="{{ maxprice }}" data-from="200" data-to="500"/>
+                                        <div class="range-price">Цена:&#100;
+                                            <div class="rangePrice">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input class="form-input form-input_full" id="name_product" name="name_product"
+                                           type="text" placeholder="Название"/>
+                                </div>
+                                <div class="form-group">
+                                    <!-- - var options = setOptions(items, ['value', 'selected', 'disabled']);-->
+                                </div>
+                                <div class="form-group">
+                                    <label class="toggle">
+                                        <input type="checkbox" name="stock" id="stock" value="on"/><span class="toggle-box"></span><span
+                                            class="toggle-text">Только товары в наличии</span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <div class="buttons">
+                                        <button class="btn btn_square btn_dark btn_narrow" type="submit" name="save"
+                                                value="#">Фильтр
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="Section-columnSection">
+                        <header class="Section-header">
+                            <strong class="Section-title">Популярные тэги
+                            </strong>
+                        </header>
+                        <div class="Section-columnContent">
+                            <div class="buttons">
+                            {% for test in popular_tags %}
+                                <a class="btn btn_default btn_sm" href="?parameter=subcategory&flag={{test.product.subcategory}}">{{test.product.subcategory}}</a>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="Section-content">
+                    <div class="Sort">
+                        <div class="Sort-title">Сортировать по:
+                        </div>
+                            <div class="Sort-variants">
+                                {% if sort_popular == 'popular_high' %}
+                                    <a class="Sort-sortBy Sort-sortBy_inc" href="/catalog/?parameter=popular">Популярности</a>
+                                {% else %}
+                                    <a class="Sort-sortBy Sort-sortBy_dec" href="?parameter=-popular">Популярности</a>
+                                {% endif %}
+                                <a class="Sort-sortBy" href="/catalog/?parameter=price">Цене</a>
+                                <a class="Sort-sortBy" href="/catalog/?parameter=comments">Отзывам</a>
+                                {% if sort_price == 'price_high' %}
+                                    <a class="Sort-sortBy Sort-sortBy_inc" href="/catalog/?parameter=product__created">Новизне</a>
+                                {% else %}
+                                    <a class="Sort-sortBy Sort-sortBy_dec" href="?parameter=-product__created">Новизне</a>
+                                {% endif %}
+                            </div>
+                    </div>
+                    <div class="Cards">
+                        {% for product in productsinshops %}
+                            <div class="Card"><a class="Card-picture" href="{{ url ('appcatalog:product_details', pk=product.id) }} ">
+                                          <img src="{{ product.product.image_main.url }}" alt="{{ product.product.image_main }}"/></a>
+                                <div class="Card-content Card-content_new">
+                                    <strong class="Card-title"><a href="{{ url ('appcatalog:product_details', pk=product.id) }} ">{{ product.product.name }}</a>
+                                    </strong>
+                                    <div class="Card-description">
+                                        {% if product.product_discount.all() %}
+                                            {% for discount in product.product_discount.all() %}
+                                            {% if discount.get_price_product() %}
+                                                <div class="Card-cost"><span class="Card-priceOld"><s>{{product.price}}</s> </span></div>
+                                                <div class="Card-cost"><span class="Card-price">{{discount.get_price_product()}} </span></div>
+                                            {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                             <div class="Card-cost"><span class="Card-price">{{product.price}} </span></div>
+                                        {% endif %}
+
+                                        <div class="Card-category">{{ product.product.category }}
+                                            / {{ product.product.subcategory }}
+                                        </div>
+                                        <div class="Card-hover">
+                                            <a class="Card-btn"
+{#                                                 href="#">#}
+                                                 href="{{ url('app_cart:cart_add', product_in_shop_id=product.id) }}">
+                                                <img
+                                                    src="{{ static ('assets/img/icons/card/cart.svg') }}"
+                                                    alt="cart.svg"/></a>
+                                            {% if product.product.specification.values() %}
+                                                <a class="Card-comparison"
+                                                   href="{{ url ('app_cart:add_in_comparison', product_id=product.id ) }}"><img
+                                                        src="{{ static ('assets/img/icons/card/comparison.svg') }}"
+                                                        width="20px"
+                                                        alt="comparison.svg"/></a>
+
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <div class="Pagination">
+                            <div class="Pagination-ins">
+                                {% if catalog_page_obj.has_previous() %}
+                                    <a class="Pagination-element Pagination-element_prev"
+                                       href="?page_catalog={{ catalog_page_obj.previous_page_number() }}"><img
+                                            src="{{ static ('assets/img/icons/prevPagination.svg') }}"
+                                            alt="prevPagination.svg"/></a>
+                                    <a class="Pagination-element"
+                                       href="?page_catalog={{ catalog_page_obj.previous_page_number() }}">{{ catalog_page_obj.previous_page_number() }}<span
+                                            class="Pagination-text"></span></a>
+                                {% endif %}
+                                <a class="Pagination-element Pagination-element_current"
+                                   href="?page_catalog={{ catalog_page_obj.number }}"><span
+                                        class="Pagination-text">{{ catalog_page_obj.number }}</span></a>
+                                {% if catalog_page_obj.has_next() %}
+                                    <a class="Pagination-element"
+                                       href="?page_catalog={{ catalog_page_obj.next_page_number() }}"><span
+                                            class="Pagination-text">{{ catalog_page_obj.next_page_number() }}</span></a>
+                                    <a class="Pagination-element Pagination-element_prev"
+                                       href="?page_catalog={{ catalog_page_obj.next_page_number() }}"><img
+                                            src="{{ static ('assets/img/icons/nextPagination.svg') }}"
+                                            alt="nextPagination.svg"/></a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

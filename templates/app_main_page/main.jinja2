@@ -1,0 +1,217 @@
+{% extends 'base.jinja2' %}
+
+{% block title %}
+   Главная
+{% endblock %}
+
+{% block body%}
+{% if get_messages(request) %}
+    {% for message in get_messages(request) %}
+    {{ message }}
+    {% endfor %}
+{% endif %}
+    <header class="Header">
+        <div class="Header-slider">
+            <div class="Slider Slider_main">
+              <div class="Slider-box">
+              {% for banner in products_banners %}
+                <div class="Slider-item">
+                  <div class="Slider-content">
+                    <div class="row">
+                      <div class="row-block">
+                        <strong class="Slider-title"><a href="{{ url ('appcatalog:product_details', pk=banner.id) }}">{{ banner.product.name }}</a></strong>
+                        <div class="Slider-text">{{ banner.product.description }}</div>
+                        <div class="Slider-footer"><a class="btn btn_primary" href="{{ url ('appcatalog:product_details', pk=banner.id) }}">Get Started</a>
+                        </div>
+                      </div>
+                      <div class="row-block">
+                        <div class="Slider-img">
+                        <img src="{{ banner.product.image_main.url }}"alt="{{ banner.product.image_main }}"/>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="Slider-navigateWrap">
+                <div class="Slider-navigate">
+                </div>
+              </div>
+            </div>
+        </div>
+    </header>
+    <div class="Middle">
+        {% if limited_offers %}
+        <div class="Section Section_column Section_columnLeft Section_columnDesktop">
+            <div class="wrap">
+                <div class="Section-column">
+                    <div class="Section-columnSection Section-columnSection_mark">
+                        <header class="Section-columnHeader">
+                            <strong class="Section-columnTitle">ОГРАНИЧЕННЫЕ ПРЕДЛОЖЕНИЯ </strong>
+                        </header>
+                        <div class="Card">
+
+                        {% for one_product_limited in limited_offers %}
+
+                            <a class="Card-picture" href="{{ url ('appcatalog:product_details', pk=one_product_limited.id) }}">
+                                <img class="Card-picture_size-img" src="{{ one_product_limited.product.image_main.url }}"alt="{{ one_product_limited.product.image_main }}"/>
+                            </a>
+                            <div class="Card-content Card-content_new">
+                                <strong class="Card-title"><a href="{{ url ('appcatalog:product_details', pk=one_product_limited.id) }}">{{one_product_limited.product.name}}</a></strong>
+                                <div class="Card-description">
+                                    <div class="Card-cost">
+                                       {% if one_product_limited.product_discount.all() %}
+                                            {% for discount in one_product_limited.product_discount.all() %}
+                                                {% if discount.get_price_product() %}
+                                                <span class="Card-priceOld">{{one_product_limited.price}}</span><span class="Card-price"> {{discount.get_price_product()}}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                             <div class="Card-cost"><span class="Card-price">{{one_product_limited.price}} </span></div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="Card-category">{{one_product_limited.product.category}} / {{one_product_limited.product.subcategory}}</div>
+                                </div>
+                                <div class="CountDown">
+                                    <div class="CountDown-block">
+                                        <div class="CountDown-wrap">
+                                            <div class="CountDown-days">
+                                            <span id="d" ></span>
+                                            </div><span class="CountDown-label">days</span>
+                                        </div>
+                                    </div>
+                                    <div class="CountDown-block">
+                                        <div class="CountDown-wrap">
+                                            <div class="CountDown-hours">
+                                            <span id="h" ></span>
+                                            </div><span class="CountDown-label" id="h">hours</span>
+                                        </div>
+                                    </div>
+                                    <div class="CountDown-block">
+                                        <div class="CountDown-wrap">
+                                            <div class="CountDown-minutes">
+                                            <span id="m" ></span>
+                                            </div><span class="CountDown-label" id="m">mins</span>
+                                        </div>
+                                    </div>
+                                    <div class="CountDown-block">
+                                        <div class="CountDown-wrap">
+                                            <div class="CountDown-secs">
+                                            <span id="s" ></span>
+                                            </div><span class="CountDown-label" id="s">secs</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+            {% endif %}
+                <div class="Section-content">
+                    <header class="Section-header">
+                        <h2 class="Section-title">Популярные товары
+                        </h2>
+                    </header>
+                    <div class="Cards">
+                    {% for top_product in top_products %}
+                        <div class="Card hide_md">
+                            <a class="Card-picture" href="{{ url ('appcatalog:product_details', pk=top_product.id) }}">
+                                <img class="Card-picture_size-img" src="{{ top_product.product.image_main.url }}"alt="{{ top_product.product.image_main }}"/>
+                            </a>
+                            <div class="Card-content Card-content_new">
+                                <strong class="Card-title" ><a href="{{ url ('appcatalog:product_details', pk=top_product.id) }}">{{top_product.product.name}}</a>
+                                </strong>
+                                <div class="Card-description">
+                                    {% if top_product.product_discount.all() %}
+                                        {% for discount in top_product.product_discount.all() %}
+                                        {% if discount.get_price_product() %}
+                                            <div class="Card-cost"><span class="Card-priceOld"><s>{{top_product.price}}</s> </span></div>
+                                            <div class="Card-cost"><span class="Card-price">{{discount.get_price_product()}} </span></div>
+                                        {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                         <div class="Card-cost"><span class="Card-price">{{top_product.price}} </span></div>
+                                    {% endif %}
+                                    <div class="Card-category">{{top_product.product.category}}/{{top_product.product.subcategory}}
+                                    </div>
+                                    <div class="Card-hover">
+                                        <a class="Card-btn" href="{{ url('app_cart:cart_add', product_in_shop_id=top_product.id) }}">
+                                            <img src="{{ static ('assets/img/icons/card/cart.svg') }}" alt="cart.svg" />
+                                        </a>
+                                        <a class="Card-comparison" href="{{ url ('app_cart:add_in_comparison', product_id=top_product.id ) }} ">
+                                            <img src="{{ static ('assets/img/icons/card/comparison.svg') }}" width="20px" alt="comparison.svg"/>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="Section Section_column Section_columnRight">
+
+            {% if products_limited and products_limited|length>0 %}
+            <div class="wrap">
+                <div class="Section-content">
+                    <div class="Slider Slider_carousel">
+                        <header class="Section-header Section-header_close">
+                            <h2 class="Section-title">Ограниченный тираж
+                            </h2>
+                            <div class="Section-control">
+                                <div class="Slider-navigate">
+                                </div>
+                            </div>
+                        </header>
+                        <div class="Slider-box Cards">
+                        {% for product_limit in products_limited %}
+                            <div class="Slider-item">
+                                <div class="Slider-content">
+                                    <div class="Card">
+                                        <a class="Card-picture" href="{{ url ('appcatalog:product_details', pk=product_limit.id) }}">
+                                            <img class="Card-picture_size-img-popular" src="{{ product_limit.product.image_main.url }}"alt="{{ product_limit.product.image_main }}"/>
+                                        </a>
+                                        <div class="Card-content Card-content_new">
+                                            <strong class="Card-title"><a href="{{ url ('appcatalog:product_details', pk=product_limit.id) }}">{{product_limit.product.name}}</a>
+                                            </strong>
+                                            <div class="Card-description">
+                                                {% if product_limit.product_discount.all() %}
+                                                    {% for discount in product_limit.product_discount.all() %}
+                                                    {% if discount.get_price_product() %}
+                                                        <div class="Card-cost"><span class="Card-priceOld"><s>{{product_limit.price}}</s> </span></div>
+                                                        <div class="Card-cost"><span class="Card-price">{{discount.get_price_product()}} </span></div>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                {% else %}
+                                                     <div class="Card-cost"><span class="Card-price">{{product_limit.price}} </span></div>
+                                                {% endif %}
+                                                <div class="Card-category">{{product_limit.product.category}}/{{product_limit.product.subcategory}}
+                                                </div>
+                                                <div class="Card-hover">
+                                                    <a class="Card-btn" href="{{ url('app_cart:cart_add', product_in_shop_id=product_limit.id) }}">
+                                                    <img src="{{ static ('assets/img/icons/card/cart.svg') }}" alt="cart.svg" />
+                                                    </a>
+                                                    <a class="Card-comparison" href="{{ url ('app_cart:add_in_comparison', product_id=product_limit.id ) }} ">
+                                                    <img src="{{ static ('assets/img/icons/card/comparison.svg') }}" width="20px" alt="comparison.svg"/>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+
+{% endblock %}
